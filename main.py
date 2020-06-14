@@ -1,8 +1,23 @@
 #!/bin/env python3
 from tkinter import *
+import string
+from random import choice
 
 #constante var
 BG_COLOR = "#5c3314"
+
+#class with button commands
+class Button_cmd():
+
+    def __init__(self):
+        pass
+
+    def generate_password(self):
+        length = 12
+        possible_chars = string.ascii_letters + string.punctuation + string.digits
+        password = "".join(choice(possible_chars) for let in range(length))
+        app.paswd_entry.delete(0, END)
+        app.paswd_entry.insert(0, password)
 
 #create main window
 class Window():
@@ -10,6 +25,7 @@ class Window():
     def __init__(self):
         self.wind = Tk()
         self.config_window()
+        self.command = Button_cmd()
 
         #center with text entry and button
         self.central_fram = Frame(bg=BG_COLOR)
@@ -46,7 +62,8 @@ class Window():
         self.paswd_entry.grid(row = 1, column = 0)
     
     def set_generate_button(self):
-        generate_button = Button(self.central_fram, text = 'Generate', font=("arial", 24), bg=BG_COLOR)
+        generate_button = Button(self.central_fram, text = 'Generate', font=("arial", 24), bg=BG_COLOR,
+            command=self.command.generate_password)
         generate_button.grid(row = 2, column = 0)
 
 
