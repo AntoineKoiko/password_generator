@@ -1,5 +1,6 @@
 #!/bin/env python3
 from tkinter import *
+from tkinter import messagebox
 import string
 from random import choice
 
@@ -27,7 +28,7 @@ def my_decode(msg):
 class Button_cmd():
 
     def __init__(self):
-        pass
+        self.can_save = False
 
     def generate_password(self):
         length = 12
@@ -36,10 +37,18 @@ class Button_cmd():
         app.paswd_entry.delete(0, END)
         app.paswd_entry.insert(0, password)
         app.cur_pass = password
+        self.can_save = True
 
     def save_password(self):
-        with open(SAVE_PATH, "a+") as file:
-            file.write(my_encode(app.cur_pass) + "\n")
+        if self.can_save:
+            if len(app.cur_pass) != 0:
+                with open(SAVE_PATH, "a+") as file:
+                    file.write(my_encode(app.cur_pass) + "\n")
+                self.can_save = False
+            else:
+                messagebox.showerror(title="Saving Error",  message="Password already saved")
+        else:
+            messagebox.showerror(title="Saving Error",  message="Please generate a password before saving it")
 
 #create main window
 class Window():
@@ -49,6 +58,7 @@ class Window():
         self.config_window()
         self.command = Button_cmd()
         self.cur_pass = ""
+        self.pass_list_wind = None
 
         #center with text entry and button
         self.central_fram = Frame(bg=BG_COLOR)
@@ -96,12 +106,16 @@ class Window():
             command=self.command.save_password)
         save_button.grid(row = 4, column = 0)
 
+    def create_pass_display(self):
+        self.pass_list_wind = Password_list(self.wind)
+        self.pass_list_wind.display_wind()
+
     def set_menu_bar(self):
         menu_bar = Menu(self.wind)
 
         file_menu = Menu(menu_bar, tearoff=0)
         file_menu.add_command(label="Generate", command=self.command.generate_password)
-        file_menu.add_command(label="My password", command=open_password_list)
+        file_menu.add_command(label="My password", command=self.create_pass_display)
         file_menu.add_separator()
         file_menu.add_command(label="Quit", command=self.wind.quit)
         menu_bar.add_cascade(label="File", menu=file_menu)
@@ -112,29 +126,43 @@ class Window():
 """
 Window tho see our password
 """
+class Password_list():
+    def __init__(self, master):
+        self.wind = Toplevel(master)
+        self.set_wind()
 
-def display_password(top):
-    lines = []
+    def set_wind(self):
+        self.wind.title("My password")
+        self.wind.geometry("480x300")
+        self.wind.config(background="blue")
 
-    with open(SAVE_PATH, "r") as file:
-        lines = file.readlines()
-    for idx, line in enumerate(lines):
-        paswd = my_decode(line[:-1])
-        list_passwd_lb = Label(top, text = f'Password : {paswd}', bg="blue", font=("arial", 12))
-        list_passwd_lb.grid(row = idx, column = 0)
-    
+    def display_wind(self):
+        self.display_password()
+        self.wind.mainloop()
 
-def open_password_list():
-    top = Toplevel(app.wind)
-    top.title("My password")
-    top.geometry("480x300")
-    top.config(background="blue")
+    def display_password(self):
+        lines = []
 
-    display_password(top)
-    top.mainloop()
+        try:
+            with open(SAVE_PATH, "r") as file:
+                lines = file.readlines()
+        except:
+            print("Error : oppening saving files, check if the file exist")
+        for idx, line in enumerate(lines):
+            paswd = my_decode(line[:-1])
+            list_passwd_lb = Label(self.wind, text = f'Password : {paswd}', bg="blue", font=("arial", 12))
+            list_passwd_lb.grid(row = idx, column = 0)
+
+def check_password(top, looged_password):
+    value = ""
+    var_str = StringVar()
+
+    log = Entry(top, bg="blue", textvariable=var_str)
+    log.pack(expand=YES)
+    value = log.get()
+    print(var_str.get())
 
 app = Window()
-pass_list = []
 
 #mainloop
 app.wind.mainloop()
