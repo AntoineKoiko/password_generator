@@ -131,6 +131,7 @@ class Password_list():
     def __init__(self, master):
         #sub window
         self.wind = Toplevel(master)
+        self.scrollbar = Scrollbar(self.wind)
         self.set_wind()
 
         #login view
@@ -163,6 +164,8 @@ class Password_list():
 
     def display_password(self):
         lines = []
+        paswd_listing = Listbox(self.wind, yscrollcommand=self.scrollbar.set, bg="blue",
+                        font=("arial", 16))
 
         try:
             with open(SAVE_PATH, "r") as file:
@@ -171,8 +174,10 @@ class Password_list():
             print("Error : oppening saving files, check if the file exist")
         for line in lines:
             paswd = my_decode(line[:-1])
-            list_passwd_lb = Label(self.wind, text = f'Password : {paswd}', bg="blue", font=("arial", 12))
-            list_passwd_lb.pack()
+            paswd_listing.insert(END, "Password :" + paswd)
+        paswd_listing.pack(side = LEFT, fill = Y)
+        self.scrollbar.config(command=paswd_listing.yview)
+        self.scrollbar.pack(side = RIGHT, fill = Y)
 
     def check_password(self):
         value = self.enter_password.get()
