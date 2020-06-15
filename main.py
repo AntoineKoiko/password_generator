@@ -8,6 +8,7 @@ from random import choice
 BG_COLOR = "#5c3314"
 SAVE_PATH = "password.txt"
 SECRET_KEY = 12
+LOG_PASSWORD = "toto"
 
 #encode / decode msg (for password)
 def my_encode(msg):
@@ -128,16 +129,36 @@ Window tho see our password
 """
 class Password_list():
     def __init__(self, master):
+        #sub window
         self.wind = Toplevel(master)
         self.set_wind()
+
+        #login view
+        self.enter_password = StringVar()
+        self.label_title = Label(self.wind, text = 'Enter your password', bg="blue", font=("arial", 22))
+        self.pass_entry = Entry(self.wind, textvariable=self.enter_password, bg="blue", font=("arial", 22))
+        self.submit_pass = Button(self.wind, text = 'Submit', command = self.check_password)
+        self.set_login_view()
+
+        #user can see password
+        self.Acces = False
 
     def set_wind(self):
         self.wind.title("My password")
         self.wind.geometry("480x300")
         self.wind.config(background="blue")
 
+    def set_login_view(self):
+        self.label_title.pack()
+        self.pass_entry.pack()
+        self.submit_pass.pack()
+
+    def del_log_view(self):
+        self.label_title.pack_forget()
+        self.pass_entry.pack_forget()
+        self.submit_pass.pack_forget()
+
     def display_wind(self):
-        self.display_password()
         self.wind.mainloop()
 
     def display_password(self):
@@ -148,19 +169,19 @@ class Password_list():
                 lines = file.readlines()
         except:
             print("Error : oppening saving files, check if the file exist")
-        for idx, line in enumerate(lines):
+        for line in lines:
             paswd = my_decode(line[:-1])
             list_passwd_lb = Label(self.wind, text = f'Password : {paswd}', bg="blue", font=("arial", 12))
-            list_passwd_lb.grid(row = idx, column = 0)
+            list_passwd_lb.pack()
 
-def check_password(top, looged_password):
-    value = ""
-    var_str = StringVar()
+    def check_password(self):
+        value = self.enter_password.get()
+        if value == LOG_PASSWORD:
+            self.del_log_view()
+            self.display_password()
+        else:
+            messagebox.showerror(title="Login error",  message="Bad password")
 
-    log = Entry(top, bg="blue", textvariable=var_str)
-    log.pack(expand=YES)
-    value = log.get()
-    print(var_str.get())
 
 app = Window()
 
